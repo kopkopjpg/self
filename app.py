@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 “””
-MediaDrop — Web-based media downloader
+MediaDrop - Web-based media downloader
 Supports YouTube, SoundCloud, and Spotify (via YouTube search)
 
 Install:  pip install flask yt-dlp requests
@@ -25,7 +25,7 @@ DOWNLOAD_DIR.mkdir(exist_ok=True)
 
 jobs = {}
 
-# ── platform detection ────────────────────────────────────────────────────────
+# – platform detection ––––––––––––––––––––––––––––
 
 def detect_platform(url):
 url_lower = url.lower()
@@ -37,7 +37,7 @@ if “soundcloud.com” in url_lower:
 return “soundcloud”
 return “generic”
 
-# ── spotify metadata ──────────────────────────────────────────────────────────
+# – spotify metadata –––––––––––––––––––––––––––––
 
 def resolve_spotify(url):
 try:
@@ -48,7 +48,7 @@ return re.sub(r”\s*-\s*”, “ “, title)
 except Exception:
 return None
 
-# ── download worker ───────────────────────────────────────────────────────────
+# – download worker ———————————————————–
 
 def run_download(job_id, url, mode):
 jobs[job_id][“status”] = “downloading”
@@ -75,7 +75,7 @@ if platform == "spotify":
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = "Could not resolve Spotify track metadata."
         return
-    jobs[job_id]["info"] = f"Spotify → searching YouTube for: {query}"
+    jobs[job_id]["info"] = f"Spotify -> searching YouTube for: {query}"
     actual_url = f"ytsearch1:{query} official audio"
 else:
     actual_url = url
@@ -121,7 +121,7 @@ except Exception as e:
     jobs[job_id]["error"] = str(e)
 ```
 
-# ── API routes ────────────────────────────────────────────────────────────────
+# – API routes ––––––––––––––––––––––––––––––––
 
 @app.route(”/api/download”, methods=[“POST”])
 def start_download():
@@ -174,7 +174,7 @@ return send_from_directory(DOWNLOAD_DIR.resolve(), job[“filename”], as_attac
 def download_file(filename):
 return send_from_directory(DOWNLOAD_DIR.resolve(), filename, as_attachment=True)
 
-# ── frontend ──────────────────────────────────────────────────────────────────
+# – frontend ——————————————————————
 
 HTML = “””<!DOCTYPE html>
 
@@ -572,7 +572,7 @@ footer span { color: var(–accent); }
       </div>
       <h1>MediaDrop</h1>
     </div>
-    <p class="tagline">paste · pick · download</p>
+    <p class="tagline">paste * pick * download</p>
   </header>
 
   <div class="platforms">
@@ -612,7 +612,7 @@ footer span { color: var(–accent); }
   </select>
 </div>
 
-<button class="dl-btn" id="dlBtn" onclick="startDownload()">↓ Download</button>
+<button class="dl-btn" id="dlBtn" onclick="startDownload()">v Download</button>
 ```
 
   </div>
@@ -621,11 +621,11 @@ footer span { color: var(–accent); }
 
   <div class="card status-card" id="statusCard">
     <div class="status-header">
-      <div class="thumb-placeholder" id="thumbPlaceholder">🎵</div>
+      <div class="thumb-placeholder" id="thumbPlaceholder">~</div>
       <img class="thumb" id="thumb" style="display:none" alt="thumbnail">
       <div class="status-meta">
-        <div class="status-title" id="statusTitle">Starting…</div>
-        <div class="status-platform" id="statusPlatform">—</div>
+        <div class="status-title" id="statusTitle">Starting...</div>
+        <div class="status-platform" id="statusPlatform">-</div>
       </div>
     </div>
 
@@ -642,13 +642,13 @@ footer span { color: var(–accent); }
 <div class="info-line" id="infoLine"></div>
 <div class="error-msg" id="errorMsg"></div>
 
-<a class="save-btn" id="saveBtn" href="#" download>⬇ Save to Files</a>
-<button class="new-btn" id="newBtn" onclick="reset()">↩ Download another</button>
+<a class="save-btn" id="saveBtn" href="#" download>v Save to Files</a>
+<button class="new-btn" id="newBtn" onclick="reset()"><- Download another</button>
 ```
 
   </div>
 
-  <footer>made with <span>yt-dlp</span> · runs locally on your machine</footer>
+  <footer>made with <span>yt-dlp</span> * runs locally on your machine</footer>
 </div>
 
 <script>
@@ -677,11 +677,11 @@ async function startDownload() {
 
   const quality = document.getElementById('qualitySelect').value;
   document.getElementById('dlBtn').disabled = true;
-  document.getElementById('dlBtn').textContent = 'Starting…';
+  document.getElementById('dlBtn').textContent = 'Starting...';
 
   // show status card
   document.getElementById('statusCard').classList.add('visible');
-  document.getElementById('statusTitle').textContent = 'Queuing download…';
+  document.getElementById('statusTitle').textContent = 'Queuing download...';
   document.getElementById('statusPlatform').textContent = detectPlatform(url);
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('progressPct').textContent = '0%';
@@ -730,23 +730,23 @@ function pollJob(jobId) {
       document.getElementById('progressFill').style.width = '100%';
       document.getElementById('progressPct').textContent = '100%';
       document.getElementById('progressSpeed').textContent = '';
-      document.getElementById('progressEta').textContent = '✓ Done';
+      document.getElementById('progressEta').textContent = 'v Done';
       const saveBtn = document.getElementById('saveBtn');
       saveBtn.href = `/api/file/${jobId}`;
       saveBtn.setAttribute('download', job.filename || 'media');
       saveBtn.classList.add('visible');
       document.getElementById('newBtn').classList.add('visible');
-      document.getElementById('dlBtn').textContent = '↓ Download';
+      document.getElementById('dlBtn').textContent = 'v Download';
     }
 
     if (job.status === 'error') {
       clearInterval(pollTimer);
       document.getElementById('progressFill').classList.add('error');
       document.getElementById('progressFill').style.width = '100%';
-      document.getElementById('errorMsg').textContent = '⚠ ' + job.error;
+      document.getElementById('errorMsg').textContent = '! ' + job.error;
       document.getElementById('newBtn').classList.add('visible');
       document.getElementById('dlBtn').disabled = false;
-      document.getElementById('dlBtn').textContent = '↓ Download';
+      document.getElementById('dlBtn').textContent = 'v Download';
     }
   }, 800);
 }
@@ -765,7 +765,7 @@ function reset() {
   document.getElementById('progressFill').classList.remove('error');
   document.getElementById('urlInput').value = '';
   document.getElementById('dlBtn').disabled = false;
-  document.getElementById('dlBtn').textContent = '↓ Download';
+  document.getElementById('dlBtn').textContent = 'v Download';
   document.getElementById('urlInput').focus();
 }
 </script>
@@ -779,5 +779,5 @@ return render_template_string(HTML)
 
 if **name** == “**main**”:
 port = int(os.environ.get(“PORT”, 8080))
-print(f”\n  🎵  MediaDrop is running on port {port}!\n”)
+print(f”\n  ~  MediaDrop is running on port {port}!\n”)
 app.run(host=“0.0.0.0”, port=port, debug=False)
